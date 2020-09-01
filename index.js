@@ -15,6 +15,8 @@ let users = [
   },
 ];
 
+let nextId = 2;
+
 server.get("/api/users", (req, res) => {
     if (!users) {
         res.status(500).json({ errorMessage: "The users information could not be retrieved." });
@@ -35,40 +37,59 @@ server.get("/api/users/:id", (req, res) => {
 });
 
 server.post("/api/users", (req, res) => {
-  const newUser = { id: nextId++, name: req.body.name, bio: req.body.bio };
+  const newUser = { 
+      id: nextId++, 
+      name: req.body.name, 
+      bio: req.body.bio 
+    };
+
   const newUserName = req.body.name; // read the info
   const newUserBio = req.body.bio;
 
   if(!newUserName || !newUserBio) { // If the request body is missing the name or bio property:
     res.status(400).json({ errorMessage: "Please provide name and bio for the user." });
   } else if(newUserName && newUserBio) {  // If the information about the user is valid:
-    users.push(user);
+    users.push(newUser);
     res.status(201).json({data:users});
   } else { // If there's an error while saving the user:
       res.status(500).json({ errorMessage: "There was an error while saving the user to the database" })
   }
 });
 
-server.delete("/api/users/:id", (req,res) => {
-    const id = Number(req.params.id);
-    users = users.filter(use => use.id !== id);
+// server.delete("/api/users/:id", (req,res) => {
+//     const id = Number(req.params.id);
+//     users = users.filter(use => use.id !== id);
 
-    if(users) {
-        Object.assign(found, changes);
-        res.status(200).json(found);
-    } else if (!users) {
-        res.status(404).json({ message: "The user with the specified ID does not exist." });
+//     if(users[id]) {
+//         Object.assign(found, changes);
+//         res.status(200).json(found);
+//     } else if (!users[id]) {
+//         res.status(404).json({ message: "The user with the specified ID does not exist." });
+//     } else {
+//         res.status(500).json({ errorMessage: "The user could not be removed" });
+//     }
+// });
+
+server.delete("/api/users/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const newUsers = users.filter((user) => user.id !== id);
+
+    if (users[id]) {
+      res.status(200).json(newUsers);
+    } else if (!users[id]) {
+      res.status(404).json({ message: "The user with the specified ID does not exist." });
     } else {
-        res.status(500).json({ errorMessage: "The user could not be removed" });
+      res.status(500).json({ errorMessage: "The user could not be removed" });
     }
-});
+  });
 
 server.put("/api/users/:id", (req,res) => {
     const changes = req.body;
     const id = Number(req.params.id);
-    let found = users.find(user => user.id === id);
     const newUserName = req.body.name; // read the info
     const newUserBio = req.body.bio;
+
+    let found = users.find(user => user.id === id);
 
     if(found) {
         Object.assign(found, changes);
